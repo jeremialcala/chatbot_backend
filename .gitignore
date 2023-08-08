@@ -108,5 +108,5 @@ venv.bak/
 .certs/
 env_variables
 test.py
-./llama-7b-hf
-./llama
+llama-7b-hf/
+llama/
