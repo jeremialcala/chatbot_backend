@@ -7,7 +7,7 @@ from utils import (timeit, load_env_variables, load_credentials, create_session_
                    get_sentence_context, send_message, prepare_sentences, generate_response)
 from objects import Database
 
-arg_names = ["--fb"]
+arg_names = ["--file-name", "--use-cuda"]
 
 
 def get_help():
@@ -17,12 +17,12 @@ def get_help():
 
     Args:
         --file-name (str): This is a file with all environment variables for the project.
-
+        --use-cuda: Enables the use of cuda GPU, needs a configuration for pytorch + CUDA.
     Returns:
 
     """
 
-
+@timeit
 def process_messages(variables, queue, _db, use_cuda=False):
 
     model = "llama-7b-hf"
