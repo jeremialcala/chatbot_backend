@@ -18,15 +18,15 @@ def get_user_info(variables, sender_id):
 
 @timeit
 def send_message(recipient_id, message_text, variables):
-    message_text = message_text.format()
-    data = json.dumps({"recipient": {"id": recipient_id}, "message": {"text": message_text}})
-    params["access_token"] = variables[PAGE_ACCESS_TOKEN]
-    url = variables[FB_MESSAGES_URL].format(variables[FB_API_VERSION])
-    r = requests.post(url=url, params=params, headers=headers, data=data)
-    if r.status_code == 200:
-        return json.loads(r.text)
-    else:
-        print(r.text)
+    multi_message = message_text.split("\n")
+    for message in multi_message:
+        if len(message) > 0:
+            data = json.dumps({"recipient": {"id": recipient_id}, "message": {"text": message.format()}})
+            params["access_token"] = variables[PAGE_ACCESS_TOKEN]
+            url = variables[FB_MESSAGES_URL].format(variables[FB_API_VERSION])
+            r = requests.post(url=url, params=params, headers=headers, data=data)
+            print(r.text)
+
 
 
 @timeit

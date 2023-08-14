@@ -1,9 +1,10 @@
-import types
 import re
+import types
+
 from constants import *
 from objects import Database, Context
+from .fb_utils import send_products, get_user_info
 from .general import timeit
-from .fb_utils import send_message, send_products, send_attachment, get_user_info
 
 
 @timeit
@@ -68,8 +69,7 @@ def generate_response(variables, context: Context, model, tokenizer, db=Database
 
 
 @timeit
-def generate_answer(_prompt, _model, _tokenizer, use_cuda=False):
-    # TODO: improve generator parameter configuration
+def generate_answer(_prompt, _model, _tokenizer, max_length=512, use_cuda=False):
 
     if use_cuda:
         t_prompt = _tokenizer(_prompt, return_tensors="pt").input_ids.cuda()
@@ -78,10 +78,7 @@ def generate_answer(_prompt, _model, _tokenizer, use_cuda=False):
 
     generated = _model.generate(
         t_prompt,
-        do_sample=True,
-        top_k=50,
-        max_length=200,
-        top_p=0.8,
-        temperature=0.7)[0]
+        max_length=max_length,
+    )[0]
 
     return _tokenizer.decode(generated)

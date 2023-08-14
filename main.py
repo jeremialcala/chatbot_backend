@@ -1,13 +1,17 @@
 import keyboard
 import sys
-import llama
+import torch
 from time import sleep
 from constants import *
 from utils import (timeit, load_env_variables, load_credentials, create_session_session, get_queue,
                    get_sentence_context, send_message, prepare_sentences, generate_response)
 from objects import Database
+from transformers import AutoTokenizer, AutoModelForCausalLM
 
 arg_names = ["--file-name", "--use-cuda"]
+
+n_gpus = torch.cuda.device_count()
+max_memory = f'{24433}MB'
 
 
 def get_help():
@@ -22,16 +26,30 @@ def get_help():
 
     """
 
+
+@timeit
+def get_llm_elements(variables, use_cuda=False):
+    model_name = variables[MODEL]
+    print("creating tokenizer...")
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    print("creating model...")
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name,
+        torch_dtype=torch.bfloat16,
+        device_map="auto",
+        low_cpu_mem_usage=True,
+        max_memory={i: max_memory for i in range(n_gpus)}
+    )
+    if use_cuda:
+        model.to("cuda")
+
+    return model, tokenizer
+
+
 @timeit
 def process_messages(variables, queue, _db, use_cuda=False):
 
-    model = "llama-7b-hf"
-    print("creating tokenizer...")
-    tokenizer = llama.LLaMATokenizer.from_pretrained(model)
-    print("creating model...")
-    model = llama.LLaMAForCausalLM.from_pretrained(model)
-    if use_cuda:
-        model.to("cuda")
+    model, tokenizer = get_llm_elements(variables, use_cuda)
 
     while True:
         for message in queue.receive_messages(MessageAttributeNames=[sender]):

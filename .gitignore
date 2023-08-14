@@ -110,3 +110,4 @@ env_variables
 test.py
 llama-7b-hf/
 llama/
+llama-2-7b-chat-hf/
